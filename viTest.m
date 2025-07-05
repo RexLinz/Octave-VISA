@@ -4,13 +4,13 @@
 % or a device at least accepting the "*IDN?" query.
 
 % open resource manager
-[rm, status] = viOpenDefaultRM;
+[visaRM, status] = viOpenDefaultRM;
 if status<0
   error("open resource manager failed");
 end
 
 % open connection to device, set terminator to 10 (\n)
-[dev, status] = viOpen(rm, "COM3", 2000, 10);
+[visaDev, status] = viOpen(visaRM, "COM3", 2000, 10);
 if status<0
   error("open device failed");
 end
@@ -31,55 +31,53 @@ end
 #define VI_ATTR_ASRL_FLOW_CNTRL               (0x3FFF0025UL)
 
 % should already be done if you use the termchar option in the viOpen function
-status = viSetAttribute(dev, 0x3FFF0038, 1); % VI_ATTR_TERMCHAR_EN
+status = viSetAttribute(visaDev, 0x3FFF0038, 1); % VI_ATTR_TERMCHAR_EN
 if status<0
-  error("enable termchar failed");
+  warning("enable termchar failed");
 end
 
 % check timeout set by viOpen
-[timeout, status] = viGetAttribute(dev,0x3FFF001A); % VI_ATTR_TMO_VALUE
+[timeout, status] = viGetAttribute(visaDev,0x3FFF001A); % VI_ATTR_TMO_VALUE
 if (status<0) | (timeout~=2000)
-  error("get attribute failed");
+  warning("get attribute failed");
 end
 % change timout
-status = viSetAttribute(dev, 0x3FFF001A, 5000); % VI_ATTR_TMO_VALUE
+status = viSetAttribute(visaDev, 0x3FFF001A, 5000); % VI_ATTR_TMO_VALUE
 if status<0
-  error("set attribute failed");
+  warning("set attribute failed");
 end
 % check if change has been successful
-[timeout, status] = viGetAttribute(dev,0x3FFF001A); % VI_ATTR_TMO_VALUE
+[timeout, status] = viGetAttribute(visaDev,0x3FFF001A); % VI_ATTR_TMO_VALUE
 if (status<0) | (timeout~=5000)
-  error("get attribute failed");
+  warning("get attribute failed");
 end
 
-tic
 % write *IDN? query to device
-status = viWrite(dev, "*IDN?\n");
+status = viWrite(visaDev, "*IDN?\n");
 if status<0
-  error("write failed");
+  warning("write failed");
 end
-
-[response, status] = viRead(dev, 100);
+% read response
+[response, status] = viRead(visaDev, 100);
 if status<0
-  error("read device failed");
+  warning("read device failed");
 end
-disp(["write *IDN? / read\n  " srtrim(response)]); % skip \n
-toc
+disp(["write *IDN? / read\n  " strtrim(response)]); % skip \n
 
-% better solution instead of using viWrite/viRead
-[response, status] = viQuery(dev, "*IDN?\n", 100);
+% more comftable solution instead of using viWrite/viRead (about same performance)
+[response, status] = viQuery(visaDev, "*IDN?\n", 100);
 if status<0
   error("query device failed");
 end
-disp(["query *IDN?\n  " srtrim(response)]); % skip \n
+disp(["query *IDN?\n  " strtrim(response)]); % skip \n
 
 % not required if you close the resource manager next
-status = viClose(dev); clear dev; % ensure we could no longer use
+status = viClose(visaDev); clear visaDev; % ensure we could no longer use
 if status<0
   error("close device failed");
 end
 
-status = viClose(rm); clear rm; % ensure we could no longer use
+status = viClose(visaRM); clear visaRM; % ensure we could no longer use
 if status<0
   error("close resource manager failed");
 end
