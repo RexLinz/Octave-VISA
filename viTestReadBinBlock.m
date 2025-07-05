@@ -1,24 +1,31 @@
-% Test viReadBinBlock function reading a screenshot (PNG)
+% Test viQueryBinBlock function reading a screenshot (PNG)
 % or waveform data from an Keysight MSO-X 2024 oscilloscope using
-% any interface, e.g. USB or LAN (socket) connection
+% any interface, e.g. USB , LAN (socket) or GPIB connection
 %
-% a binblock is a binary data transfer allowing faster transfers than
-% reading ASCII data
+% A IEEE 488.2 binblock is a binary data transfer allowing
+% faster transfers than reading ASCII data from devices
+
+% data format of IEEE 488.2 binary blocks
+% # ... ASCII character indicate header
+% n ... number of length digits to follow
+% x ... n digits of ASCII coded value representing the number of data bytes following
+% y ... followed by x data bytes (uint8)
+% terminator, typically \n (on most instruments
 
 % open resource manager
-[rm, status] = viOpenDefaultRM;
+[visaRM, status] = viOpenDefaultRM;
 if status<0
   error("open resource manager failed");
 end
 
 % open connection to device, set terminator to 10 (\n)
-[dev, status] = viOpen(rm, "MSO", 2000, 10);
+[visaDev, status] = viOpen(visaRM, "MSO", 2000, 10);
 if status<0
   error("open device failed");
 end
 
 % using viQery instead of viWrite/viRead
-[response, status] = viQuery(dev, "*IDN?\n", 100);
+[response, status] = viQuery(visaDev, "*IDN?\n", 100);
 if status<0
   error("query device failed");
 end
@@ -28,21 +35,21 @@ disp(["query *IDN?\n  " srtrim(response)]); % skip \n
 % number of waveform points returned will depend on the scope settings
 if 1 % enable or disable
   % set up scope
-  viWrite(dev, ":WAV:FORM WORD\n");  % format WORD
-  viWrite(dev, ":WAV:BYT LSBF\n");   % LSB first, required for 16 bit data
-  viWrite(dev, ":WAV:POINTS MAX\n"); % record length
+  viWrite(visaDev, ":WAV:FORM WORD\n");  % format WORD
+  viWrite(visaDev, ":WAV:BYT LSBF\n");   % LSB first, required for 16 bit data
+  viWrite(visaDev, ":WAV:POINTS MAX\n"); % record length
   % stop acquisition to give time to read all channels
-  viWrite(dev, ":STOP\n"); % stop to get all waveforms from same ackquisition
+  viWrite(visaDev, ":STOP\n"); % stop to get all waveforms from same ackquisition
 
   tic
   disp("reading channel 1 data");
-  [y1, t] = ScopeReadWaveform("CHAN1");
+  [y1, t] = ScopeReadWaveform(visaDev, "CHAN1");
   disp("reading channel 2 data");
-  [y2, t] = ScopeReadWaveform("CHAN2"); % reduntant time vector
+  [y2, t] = ScopeReadWaveform(visaDev, "CHAN2"); % reduntant time vector
   toc % about 300 ms per channel for 500k points on WiFi
 
   % restart acquisition
-  viWrite(dev, ":RUN\n");
+  viWrite(visaDev, ":RUN\n");
 
   % create plot
   figure(1, "name", "Scope Waveform");
@@ -57,11 +64,11 @@ end
 % read a screenshot as PNG from the scope
 if 0
   % set up scope (optional)
-  viWrite(dev, ":HARDcopy:INKSaver OFF\n"); % OFF = black background
+  viWrite(visaDev, ":HARDcopy:INKSaver OFF\n"); % OFF = black background
   % get image in PNG file format
-%  viWrite(dev, ":DISP:DATA? PNG,COL\n");
-%  [imgData, status] = viReadBinBlock(dev, 200000);
-  [imgData, status] = viQueryBinBlock(dev, ":DISP:DATA? PNG,COL\n", 200000); % return uint8
+%  viWrite(visaDev, ":DISP:DATA? PNG,COL\n");
+%  [imgData, status] = viReadBinBlock(visaDev, 200000);
+  [imgData, status] = viQueryBinBlock(visaDev, ":DISP:DATA? PNG,COL\n", 200000); % return uint8
   if status==0
     % write to temporary file
     fid = fopen("viTest.png", "wb");
@@ -76,19 +83,19 @@ if 0
 end
 
 % check if further communication is still fine after readBinBlock
-[response, status] = viQuery(dev, "*IDN?\n", 100);
+[response, status] = viQuery(visaDev, "*IDN?\n", 100);
 if status<0
   error("regular communication after readBinBlock failes");
 end
 
 % not required if you close the resource manager next
-status = viClose(dev); clear dev; % ensure we could no longer use
+status = viClose(visaDev); clear visaDev; % ensure we could no longer use
 if status<0
   error("close device failed");
 end
 
 % close resource manager
-status = viClose(rm); clear rm; % ensure we could no longer use
+status = viClose(visaRM); clear visaRM; % ensure we could no longer use
 if status<0
   error("close resource manager failed");
 end

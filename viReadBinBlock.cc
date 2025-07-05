@@ -1,9 +1,16 @@
-// read IEEE binary data block from VISA device
+// read IEEE 488.2 binary data block from VISA device
 //
 // [uint8Data, status] = viReadBinBlock(instrument, maxBytes)
 //
 // you might have to typecast the result to other data types in octave
 //   e.g. y = typecast(uint8Data, "int16") to combine two bytes each
+
+// data format of IEEE 488.2 binary blocks
+// # ... ASCII character indicate header
+// n ... number of length digits to follow
+// x ... n digits of ASCII coded value representing the number of data bytes following
+// y ... followed by x data bytes (uint8)
+// terminator, typically \n (on most instruments
 
 // compile and link:
 // mkoctfile -I. -L. -lvisa -s viReadBinBlock.cc
