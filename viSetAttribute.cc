@@ -1,0 +1,39 @@
+// set a VISA attribute for device
+//
+// status = viSetAttribute(device, attributeName, attributeValue)
+//
+// see VISA manual for name and value constants (numeric)
+
+// compile and link:
+// mkoctfile -I. -L. -lvisa -s viSetAttribute.cc
+
+#include <iostream>
+#include <octave/oct.h>
+#include <visa.h>
+
+ViSession instrument = 0;
+ViStatus  status = 0;
+
+DEFUN_DLD (viSetAttribute, args, nargout,
+  "status = viSetAttribute(device, attributeName, attributeValue)")
+{
+  if (args.length()!=3)
+    error("invalid number of input arguments");
+
+  if (!args(0).is_scalar_type())
+    error("expect instrument as 1st argument");
+  instrument = args(0).int_value();
+
+  if (!args(1).is_scalar_type())
+    error("attibute name (see VISA constants) as 2nd argument");
+  ViAttr attributeName = args(1).int_value();
+
+  if (!args(2).is_scalar_type())
+    error("attibute value (see VISA constants) as 3rd argument");
+  ViAttrState attrValue = args(2).int_value();
+
+  status = viSetAttribute(instrument, attributeName, attrValue);
+
+  return octave_value(status);
+}
+
