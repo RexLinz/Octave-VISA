@@ -1,7 +1,10 @@
 /MSO_VISA.NCE
 /visa.h
 /visa.lib
+/visa64.lib
 /visatype.h
+IVI Foundation/*
+NI CVI/*
 *.oct
 *.png
 *.pdf
