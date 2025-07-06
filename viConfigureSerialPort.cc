@@ -1,6 +1,6 @@
 // set a VISA attribute for device
 //
-// status = viConfigureSerialPort(device, baudrate, databits, parity, stopBits, flowControl)
+// status = viConfigureSerialPort(device, baudrate, databits=8, parity=10, stopBits=0, flowControl=0)
 //
 // see VISA manual for name and value constants (numeric)
 
@@ -40,8 +40,8 @@ ViSession instrument = 0;
 ViAttrState attrValue = 0;
 ViStatus  status = 0;
 
-DEFUN_DLD (viSetAttribute, args, nargout,
-  "status = viSetAttribute(device, attributeName, attributeValue)")
+DEFUN_DLD (viConfigureSerialPort, args, nargout,
+  "status = viConfigureSerialPort(device, baudrate, databits=8, parity=10, stopBits=0, flowControl=0)")
 {
   if (args.length()<2)
     error("invalid number of input arguments");
@@ -59,9 +59,8 @@ DEFUN_DLD (viSetAttribute, args, nargout,
     return octave_value(status);
 
   // number of data bits (optional)
-  if (args.length() < 3)
-    attrValue = 8; // 8 data bits
-  else
+  attrValue = 8; // default
+  if (args.length() > 2)
   {
     if (!args(2).is_scalar_type())
       error("expect baud rate as 3rd argument");
@@ -72,9 +71,8 @@ DEFUN_DLD (viSetAttribute, args, nargout,
     return octave_value(status);
 
   // parity (optional)
-  if (args.length() < 4)
-    attrValue = VI_ASRL_PAR_NONE;
-  else
+  attrValue = VI_ASRL_PAR_NONE; // default
+  if (args.length() > 3)
   {
     if (!args(3).is_scalar_type())
       error("expect parity as 4th argument");
@@ -85,9 +83,8 @@ DEFUN_DLD (viSetAttribute, args, nargout,
     return octave_value(status);
 
   // number of stop bits (optional)
-  if (args.length() < 5)
-    attrValue = VI_ASRL_STOP_ONE;
-  else
+  attrValue = VI_ASRL_STOP_ONE; // default
+  if (args.length() > 4)
   {
     if (!args(4).is_scalar_type())
       error("expect stop bits as 5th argument");
@@ -98,16 +95,14 @@ DEFUN_DLD (viSetAttribute, args, nargout,
     return octave_value(status);
 
   // flow control (optional)
-  if (args.length() < 6)
-    attrValue = VI_ASRL_FLOW_NONE;
-  else
+  attrValue = VI_ASRL_FLOW_NONE;
+  if (args.length() > 5)
   {
     if (!args(5).is_scalar_type())
       error("expect flow control as 6th argument");
     attrValue = args(5).int_value();
   }
   status = viSetAttribute(instrument, VI_ATTR_ASRL_FLOW_CNTRL, attrValue);
-
   return octave_value(status);
 }
 
