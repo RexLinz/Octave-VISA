@@ -25,11 +25,11 @@ DEFUN_DLD (viSetAttribute, args, nargout,
   instrument = args(0).int_value();
 
   if (!args(1).is_scalar_type())
-    error("attibute name (see VISA constants) as 2nd argument");
+    error("expect attibute name (see VISA constants) as 2nd argument");
   ViAttr attributeName = args(1).int_value();
 
   if (!args(2).is_scalar_type())
-    error("attibute value (see VISA constants) as 3rd argument");
+    error("expect attibute value (see VISA constants) as 3rd argument");
   ViAttrState attrValue = args(2).int_value();
 
   status = viSetAttribute(instrument, attributeName, attrValue);
