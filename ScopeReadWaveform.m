@@ -7,6 +7,7 @@
 
 function [y, t, status] = ScopeReadWaveform(visaDev, channel = "CHAN1")
 
+% select source to read
 viWrite(visaDev, [":WAV:SOUR " channel "\n"]);
 % preamble_block define mapping of data values to actual properties
 preAmble   = viQuery(visaDev, ":WAV:PRE?\n", 200);
