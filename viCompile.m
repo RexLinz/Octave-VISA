@@ -34,7 +34,6 @@ function compile(sourcefile)
 endfunction
 
 % standard VISA functions packed as oct file
-% add  -Wno-deprecated to skip deprecated warnings
 compile("viOpenDefaultRM.cc");
 compile("viOpen.cc");
 compile("viSetAttribute.cc");
