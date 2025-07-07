@@ -12,7 +12,8 @@ end
 % device manager is opened
 try
   % open connection to device, set terminator to 10 (\n)
-  [visaDev, status] = viOpen(visaRM, "COM3", 3000, 10);
+%  [visaDev, status] = viOpen(visaRM, "COM3", 3000, 10);
+  [visaDev, status] = viOpen(visaRM, "MSO", 3000, 10);
   if status<0
     error("open device failed");
   end
@@ -68,6 +69,7 @@ try
   disp(["write '*IDN?', read '" strtrim(response) "'"]); % skip \n
 
   % easier solution instead of using viWrite/viRead (but about same performance)
+  % typical reading for STB? = '+129'
   [response, status] = viQuery(visaDev, "*STB?\n", 100);
   if status<0
     error("query device failed");

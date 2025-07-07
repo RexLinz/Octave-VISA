@@ -44,7 +44,11 @@ try
     [y1, t] = ScopeReadWaveform(visaDev, "CHAN1");
     disp("reading channel 2 data");
     [y2, t] = ScopeReadWaveform(visaDev, "CHAN2"); % reduntant time vector
-    toc % about 300 ms per channel for 500k points on WiFi
+    toc
+    % per channel timing for 500k points
+    % 300-700 ms Notebook WiFi <-> MSO LAN
+    % 500 ms Desktop LAN <-> MSO LAN (viQueryBinBlock 220 ms)
+    % 150 ms Notebook USB
 
     % restart acquisition
     viWrite(visaDev, ":RUN\n");
@@ -60,17 +64,23 @@ try
   end
 
   % read a screenshot as PNG from the scope
-  if 0 % enable or disable
+  if 1 % enable or disable
     % set up scope (optional)
     viWrite(visaDev, ":HARDcopy:INKSaver OFF\n"); % OFF = black background
     % get image in PNG file format
   %  viWrite(visaDev, ":DISP:DATA? PNG,COL\n");
   %  [imgData, status] = viReadBinBlock(visaDev, 200000);
+    tic
     [imgData, status] = viQueryBinBlock(visaDev, ":DISP:DATA? PNG,COL\n", 200000); % return uint8
+    toc
+    % 1200 ms Notebook WiFi <-> MSO LAN
+    % 1200 ms Desktop LAN <-> MSO LAN
+    % 1200 ms Notebook USB
+
     if status==0
       % write to temporary file
       fid = fopen("viTest.png", "wb");
-      fwrite(fid, imgData(1:end-1)); % skip \n
+      fwrite(fid, imgData);
       fclose(fid);
       % display image from file
       figure(2, "name", "Scope Screenshot");
