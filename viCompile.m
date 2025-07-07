@@ -20,6 +20,7 @@
 clear all
 
 % standard VISA functions packed as oct file
+% add  -Wno-deprecated to skip deprecated warnings
 mkoctfile -I. -L. -lvisa64 -s viOpenDefaultRM.cc
 mkoctfile -I. -L. -lvisa64 -s viOpen.cc
 mkoctfile -I. -L. -lvisa64 -s viSetAttribute.cc
