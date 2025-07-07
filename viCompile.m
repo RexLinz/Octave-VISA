@@ -19,24 +19,38 @@
 % "clear all" usually helps in that case
 clear all
 
+% define a function to compile to make changing options more easy
+function compile(sourcefile)
+  disp(["compiling " sourcefile]);
+% [output, status] = mkoctfile("-I.", "-L.", "-lvisa64", "-s", sourcefile);
+% add  -Wno-deprecated to skip deprecated warnings
+  [output, status] = mkoctfile("-I.", "-L.", "-lvisa64", "-s", "-Wno-deprecated", sourcefile);
+  if length(output)>0
+    disp(output);
+  end
+  if status<0
+    error(["compile failed on file " sourcefile]);
+  end
+endfunction
+
 % standard VISA functions packed as oct file
 % add  -Wno-deprecated to skip deprecated warnings
-mkoctfile -I. -L. -lvisa64 -s viOpenDefaultRM.cc
-mkoctfile -I. -L. -lvisa64 -s viOpen.cc
-mkoctfile -I. -L. -lvisa64 -s viSetAttribute.cc
-mkoctfile -I. -L. -lvisa64 -s viGetAttribute.cc
-mkoctfile -I. -L. -lvisa64 -s viConfigureSerialPort.cc
-mkoctfile -I. -L. -lvisa64 -s viWrite.cc
-mkoctfile -I. -L. -lvisa64 -s viFlush.cc
-mkoctfile -I. -L. -lvisa64 -s viRead.cc % consider using viQuery
-mkoctfile -I. -L. -lvisa64 -s viReadBinBlock.cc % consider using viQueryBinBlock
-mkoctfile -I. -L. -lvisa64 -s viClose.cc
-mkoctfile -I. -L. -lvisa64 -s viStatusDesc.cc % get text message for status code
+compile("viOpenDefaultRM.cc");
+compile("viOpen.cc");
+compile("viSetAttribute.cc");
+compile("viGetAttribute.cc");
+compile("viConfigureSerialPort.cc");
+compile("viWrite.cc");
+compile("viFlush.cc");
+compile("viRead.cc"); % consider using viQuery
+compile("viReadBinBlock.cc"); % consider using viQueryBinBlock
+compile("viClose.cc");
+compile("viStatusDesc.cc"); % get text message for status code
 
 % extension: write/read packed as single function to reduce overhead
-mkoctfile -I. -L. -lvisa64 -s viQuery.cc % combined viWrite / viRead
-mkoctfile -I. -L. -lvisa64 -s viQueryBinBlock.cc % combined viWrite viReadBinBlock
+compile("viQuery.cc"); % combined viWrite / viRead
+compile("viQueryBinBlock.cc"); % combined viWrite viReadBinBlock
 
 % NI example RdWrt.c converted to octave
-mkoctfile -I. -L. -lvisa64 -s VISAtest.cc
+compile("VISAtest.cc");
 
