@@ -14,6 +14,9 @@
 %   VISA\Win64\Include\visatype.h
 %   VISA\Win64\Lib_x64\msc\visa64.lib
 
+% TODO
+% * add help to functions and/or create VISA.m (function overview or just help)
+
 % In some cases mkoctfile could not write output files because
 % they have not been proper closed (may happen on error conditions)
 % "clear all" usually helps in that case
