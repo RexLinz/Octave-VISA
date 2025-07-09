@@ -25,9 +25,12 @@ clear all
 % define a function to compile to make changing options more easy
 function compile(sourcefile)
   disp(["compiling " sourcefile]);
-% [output, status] = mkoctfile("-I.", "-L.", "-lvisa64", "-s", sourcefile);
-% add  -Wno-deprecated to skip deprecated warnings
-  [output, status] = mkoctfile("-I.", "-L.", "-lvisa64", "-s", "-Wno-deprecated", sourcefile);
+
+  % -s to strip debugging in formation
+  % -Wno-deprecated to skip deprecated warnings
+%  [output, status] = mkoctfile("-I.", "-L.", "-lvisa", sourcefile);
+  [output, status] = mkoctfile("-I.", "-L.", "-lvisa", "-s", sourcefile);
+%  [output, status] = mkoctfile("-I.", "-L.", "-lvisa", "-s", "-Wno-deprecated", sourcefile);
   if length(output)>0
     disp(output);
   end
