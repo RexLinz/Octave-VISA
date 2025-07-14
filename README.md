@@ -9,14 +9,15 @@ This collection is wrapping functions from the C/C++ API into oct files to be us
 
 ## Functions provided
 
-Please look at file **VISA.m** or type help VISA from within Octave for a full list of functions provided.
-
+Please look at file **VISA.m** or type **help VISA** from within Octave for a full list of functions provided.
 
 ## Examples
 
 - **viTest.m** showing basic usage.
 
-- **viTestQueryBinBlock** reading IEEE 488.2 binary block, e.g. image data
+- **viTestQueryBinBlock.m** reading IEEE 488.2 binary block, e.g. image data
+
+- **viTestWriteBinBlock.m** reading device setup (binary block), write back to device
 
 - **VISAtest.cc** is following the **RdWrt.c** example for the C/C++ API provided by National Instruments.
 

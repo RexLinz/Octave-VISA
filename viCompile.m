@@ -49,10 +49,11 @@ compile("viWrite.cc");
 compile("viFlush.cc");
 compile("viRead.cc"); % consider using viQuery
 compile("viReadBinBlock.cc"); % consider using viQueryBinBlock
+compile("viWriteBinBlock.cc"); % combined write of preamble and binary data
 compile("viClose.cc");
 compile("viStatusDesc.cc"); % get text message for status code
 
-% extension: write/read packed as single function to reduce overhead
+% extension: commands packed as single function to reduce overhead
 compile("viQuery.cc"); % combined viWrite / viRead
 compile("viQueryBinBlock.cc"); % combined viWrite viReadBinBlock
 

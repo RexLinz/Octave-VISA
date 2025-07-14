@@ -23,6 +23,8 @@
 %   Read up to maxBytes bytes from device.
 % [uint8Data, status] = viReadBinBlock(instrument, maxBytes)
 %   Read an IEEE 488.2 binary block from the device.
+% [bytesDone, status] = viWriteBinBlock(instrument, data, preamble)
+%   Write optional preamble string followed by IEEE 488.2 binary data block
 % status = viClose(resource)
 %   Close a VISA resource (device or resource manager) connection.
 % [response, status] = viStatusDesc(statusCode)
