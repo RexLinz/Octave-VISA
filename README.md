@@ -16,7 +16,7 @@ Please look at file **VISA.m** or type help VISA from within Octave for a full l
 
 - **viTest.m** showing basic usage.
 
-- **viTestQueryBinBlock**
+- **viTestQueryBinBlock** reading IEEE 488.2 binary block, e.g. image data
 
 - **VISAtest.cc** is following the **RdWrt.c** example for the C/C++ API provided by National Instruments.
 
