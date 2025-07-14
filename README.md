@@ -9,7 +9,7 @@ This collection is wrapping functions from the C/C++ API into oct files to be us
 
 ## Functions provided
 
-Please look at file **VISA.m** or type help DAQmx from within Octvae for a full list of functions provided.
+Please look at file **VISA.m** or type help VISA from within Octave for a full list of functions provided.
 
 
 ## Examples
