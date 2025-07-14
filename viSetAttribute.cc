@@ -1,10 +1,5 @@
-// set a VISA attribute for device
-//
 // status = viSetAttribute(device, attributeName, attributeValue)
-//
-// see VISA manual for name and value constants (numeric)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viSetAttribute.cc
 
 #include <iostream>
@@ -15,7 +10,9 @@ ViSession instrument = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viSetAttribute, args, nargout,
-  "status = viSetAttribute(device, attributeName, attributeValue)")
+  "status = viSetAttribute(device, attributeName, attributeValue)\n\
+set a VISA attribute for device\n\
+see VISA manual for name and value constants (numeric)")
 {
   if (args.length()!=3)
     error("invalid number of input arguments");

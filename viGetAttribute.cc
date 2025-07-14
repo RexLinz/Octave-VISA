@@ -1,10 +1,5 @@
-// get a VISA attribute from device
-//
 // [attributeValue, status] = viGetAttribute(device, attributeName)
-//
-// see VISA manual for name and value constants (numeric)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viGetAttribute.cc
 
 #include <iostream>
@@ -15,7 +10,9 @@ ViSession instrument = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viGetAttribute, args, nargout,
-  "[attributeValue, status] = viGetAttribute(device, attributeName)")
+  "[attributeValue, status] = viGetAttribute(device, attributeName)\n\
+get a VISA attribute from device\n\
+see VISA manual for name and value constants (numeric)")
 {
   if (args.length()!=2)
     error("invalid number of input arguments");

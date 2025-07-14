@@ -1,8 +1,5 @@
-// write string to VISA device, read response data
-//
 // [response, status] = viQuery(instrument, command, maxBytes)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viQuery.cc
 
 #include <iostream>
@@ -16,7 +13,8 @@ ViUInt32  bytesRequested = 0;
 ViUInt32  bytesDone = 0;
 
 DEFUN_DLD (viQuery, args, nargout,
-  "[response, status] = viQuery(instrument, command, maxBytes)")
+  "[response, status] = viQuery(instrument, command, maxBytes)\n\
+write string to VISA device, read response data")
 {
   if (args.length()!=3)
     error("invalid number of input arguments");

@@ -1,35 +1,25 @@
-// set a VISA attribute for device
-//
 // status = viConfigureSerialPort(device, baudrate, databits=8, parity=10, stopBits=0, flowControl=0)
-//
-// see VISA manual for name and value constants (numeric)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viConfigureSerialPort.cc
 
-// VISA serial attributes and values
-/*
-#define VI_ATTR_ASRL_BAUD                     (0x3FFF0021UL)
-
-#define VI_ATTR_ASRL_DATA_BITS                (0x3FFF0022UL)
-
-#define VI_ATTR_ASRL_PARITY                   (0x3FFF0023UL)
-#define VI_ASRL_PAR_NONE            (0)
-#define VI_ASRL_PAR_ODD             (1)
-#define VI_ASRL_PAR_EVEN            (2)
-#define VI_ASRL_PAR_MARK            (3)
-#define VI_ASRL_PAR_SPACE           (4)
-
-#define VI_ATTR_ASRL_STOP_BITS                (0x3FFF0024UL)
-#define VI_ASRL_STOP_ONE            (10)
-#define VI_ASRL_STOP_ONE5           (15)
-#define VI_ASRL_STOP_TWO            (20)
-
-#define VI_ATTR_ASRL_FLOW_CNTRL               (0x3FFF0025UL)
-#define VI_ASRL_FLOW_NONE           (0)
-#define VI_ASRL_FLOW_XON_XOFF       (1)
-#define VI_ASRL_FLOW_RTS_CTS        (2)
-#define VI_ASRL_FLOW_DTR_DSR        (4)
+/* some useful VISA serial attributes and values
+VI_ATTR_ASRL_BAUD           (0x3FFF0021UL)
+VI_ATTR_ASRL_DATA_BITS      (0x3FFF0022UL)
+VI_ATTR_ASRL_PARITY         (0x3FFF0023UL)
+  VI_ASRL_PAR_NONE          (0)
+  VI_ASRL_PAR_ODD           (1)
+  VI_ASRL_PAR_EVEN          (2)
+  VI_ASRL_PAR_MARK          (3)
+  VI_ASRL_PAR_SPACE         (4)
+VI_ATTR_ASRL_STOP_BITS      (0x3FFF0024UL)
+  VI_ASRL_STOP_ONE          (10)
+  VI_ASRL_STOP_ONE5         (15)
+  VI_ASRL_STOP_TWO          (20)
+VI_ATTR_ASRL_FLOW_CNTRL     (0x3FFF0025UL)
+  VI_ASRL_FLOW_NONE         (0)
+  VI_ASRL_FLOW_XON_XOFF     (1)
+  VI_ASRL_FLOW_RTS_CTS      (2)
+  VI_ASRL_FLOW_DTR_DSR      (4)
 */
 
 #include <iostream>
@@ -41,7 +31,9 @@ ViAttrState attrValue = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viConfigureSerialPort, args, nargout,
-  "status = viConfigureSerialPort(device, baudrate, databits=8, parity=10, stopBits=0, flowControl=0)")
+  "status = viConfigureSerialPort(device, baudrate, databits=8, parity=10, stopBits=0, flowControl=0)\n\
+configure parameters for serial device\n\
+see VISA manual for name and value constants (numeric)")
 {
   if (args.length()<2)
     error("invalid number of input arguments");

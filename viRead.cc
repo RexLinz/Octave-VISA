@@ -1,8 +1,5 @@
-// read string from VISA device
-//
 // [response, status] = viRead(instrument, maxBytes)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viRead.cc
 
 #include <iostream>
@@ -15,7 +12,8 @@ ViUInt32  bytesRequested = 0;
 ViUInt32  bytesDone = 0;
 
 DEFUN_DLD (viRead, args, nargout,
-  "[response, status] = viRead(instrument, maxBytes)")
+  "[response, status] = viRead(instrument, maxBytes)\n\
+read string from VISA device")
 {
   if (args.length()!=2)
     error("invalid number of input arguments");

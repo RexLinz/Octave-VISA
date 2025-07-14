@@ -1,10 +1,5 @@
-// open a VISA session to device
-//
 // [instrument, status] = viOpen(defaulRM, devName, timeout, termchar)
-//
-// timeout and termchar are optional
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viOpen.cc
 
 #include <iostream>
@@ -16,7 +11,9 @@ ViSession instrument = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viOpen, args, nargout,
-  "[instrument, status] = viOpen(defaulRM, devName, timeout, termchar)")
+  "[instrument, status] = viOpen(defaulRM, devName, timeout, termchar)\n\
+open a VISA session to device\n\
+timeout and termchar are optional")
 {
   if (args.length()<2)
     error("invalid number of input arguments");

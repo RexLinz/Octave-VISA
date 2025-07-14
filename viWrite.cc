@@ -1,8 +1,5 @@
-// write string to VISA device
-//
 // [bytesDone, status] = viWrite(instrument, data)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viWrite.cc
 
 #include <iostream>
@@ -14,7 +11,8 @@ ViStatus  status = 0;
 ViUInt32  writeCount = 0;
 
 DEFUN_DLD (viWrite, args, nargout,
-  "[bytesDone, status] = viWrite(instrument, data)")
+  "[bytesDone, status] = viWrite(instrument, data)\n\
+write string to VISA device")
 {
   if (args.length()!=2)
     error("invalid number of input arguments");

@@ -1,11 +1,5 @@
-// open default VISA resource manager
-//
 // [defaultRM, status] = viOpenDefaultRM()
-//
-// this function must be called before any other VISA functions
 
-
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viOpenDefaultRM.cc
 
 #include <iostream>
@@ -16,7 +10,9 @@ ViSession defaultRM = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viOpenDefaultRM, args, nargout,
-  "[defaultRM, status] = viOpenDefaultRM()")
+  "[defaultRM, status] = viOpenDefaultRM()\n\
+open default VISA resource manager\n\
+This function must be called before any other VISA functions")
 {
   if (args.length()!=0)
     error("invalid number of input arguments");

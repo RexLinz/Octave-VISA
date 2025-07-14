@@ -1,7 +1,12 @@
-% testing visa functions
+% testing VISA functions
 %
-% The tests below assume you have either set up a serial line loopback
-% or a device at least accepting the "*IDN?" query.
+% Requires either a SCPI enabled device or a serial loopback device to be connected.
+% 1. open the default resource manager
+% 2. open connection to device, e.g. serial port
+% 3. check reading and writing some attributes (might / will be optional in most cases)
+% 4. write an *IDN? query and read the response
+% 5. use viQuery() to read the status byte of the device
+% 6. if there is an error, close the device and device manager.
 
 % open resource manager
 [visaRM, status] = viOpenDefaultRM;

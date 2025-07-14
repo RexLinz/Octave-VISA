@@ -2,6 +2,15 @@
 % or waveform data from an Keysight MSO-X 2024 oscilloscope using
 % any interface, e.g. USB , LAN (socket) or GPIB connection
 %
+% Handling of IEEE 488.2 binary data blocks.
+% It holds two test cases, each of them could be individually enabled.
+%
+% 1. Reading oscilloscope waveform
+% 2. Reading oscilloscope screenshot as PNG
+%
+% Both have been used on an Keysight MSO-X 2024 mixed signal oscilloscope.
+% Most likely they will work on other Keysight oscilloscopes, but will need some modification for other devices.
+
 % A IEEE 488.2 binblock is a binary data transfer allowing
 % faster transfers than reading ASCII data from devices
 
@@ -10,7 +19,7 @@
 % n ... number of length digits to follow
 % x ... n digits of ASCII coded value representing the number of data bytes following
 % y ... followed by x data bytes (uint8)
-% terminator, typically \n (on most instruments
+% terminator, typically \n (on most instruments)
 
 % open resource manager
 [visaRM, status] = viOpenDefaultRM;
@@ -21,7 +30,11 @@ end
 % device manager is opened
 try
   % open connection to device, set terminator to 10 (\n)
-  [visaDev, status] = viOpen(visaRM, "MSO", 2000, 10);
+%  [visaDev, status] = viOpen(visaRM, "MSO-USB", 2000, 10); % USB
+  [visaDev, status] = viOpen(visaRM, "MSO", 2000, 10); % TCPIP0::mso2024.local::5025::SOCKET - OK
+%  [visaDev, status] = viOpen(visaRM, "MSO-SOCK", 2000, 10); % TCPIP0::10.0.0.23::5025::SOCKET - OK
+%  [visaDev, status] = viOpen(visaRM, "mso2024", 2000, 10); % TCPIP0::mso2024::inst0::INSTR - OK
+%  [visaDev, status] = viOpen(visaRM, "TCPIP0::mso2024::inst0::INSTR", 2000, 10); % TCPIP0::mso2024::inst0::INSTR - OK
   if status<0
     error("open device failed");
   end

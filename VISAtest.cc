@@ -1,15 +1,10 @@
-// Test calling VISA functions packed into GNU Octave oct file
-//
-// This is following NI example NI-VISA/examples/C/general/RdWrt.c
-// (folder within C:\Users\Public\Documents\National Instruments)
-//
+// [retval, status] = VISAtest(devicename, query)
+
 // NOTES
 // * Individual functions required are repacked in vi****.cc
-//   to build your own application
 // * you have to copy the following files from your VISA installation to the local folder to compile
 //   visa.h, visatype.h, visa.lib
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s VISAtest.cc
 
 #include <iostream>
@@ -24,7 +19,13 @@ static ViUInt32 writeCount;
 static unsigned char buffer[100] = { '\0' };
 
 DEFUN_DLD (VISAtest, args, nargout,
-  "[retval, status] = VISAtest(devicename, query)")
+  "[retval, status] = VISAtest(devicename, query)\n\
+Test calling VISA functions packed into GNU Octave oct file\n\
+This is following NI example NI-VISA/examples/C/general/RdWrt.c\n\
+(folder within C:/Users/Public/Documents/National Instruments)\n\
+Does the full job, similar to viTest.m above to do query from a device.\n\
+It might be a useful start to build your own functions if you\n\
+have just a very simple interface to your device in your application.")
 {
   if (args.length()!=2)
     error("invalid number of input arguments");

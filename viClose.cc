@@ -1,8 +1,5 @@
-// close VISA device or resource manager
-//
 // status = viClose(resource)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viClose.cc
 
 #include <iostream>
@@ -13,7 +10,8 @@ static ViSession resource = 0;
 static ViStatus status = 0;
 
 DEFUN_DLD (viClose, args, nargout,
-  "status = viClose(resource)")
+  "status = viClose(resource)\n\
+close VISA device or resource manager")
 {
   if (args.length()!=1)
     error("invalid number of input arguments");

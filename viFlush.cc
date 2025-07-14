@@ -1,15 +1,8 @@
-// flush input and/or output queue of device
-//
 // status = viFlush(device, mask=(VI_READ_BUF | VI_WRITE_BUF))
-//
-// see VISA manual for name and value constants (numeric)
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viFlush.cc
 
-// constants defined in VISA.h
-// mask could combine values from below
-/*
+/* useful constants defined in VISA.h, mask could combine values from below
 #define VI_READ_BUF                 (1)
 #define VI_WRITE_BUF                (2)
 #define VI_READ_BUF_DISCARD         (4)
@@ -28,7 +21,9 @@ ViSession instrument = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viFlush, args, nargout,
-  "status = viFlush(device, mask=(VI_READ_BUF | VI_WRITE_BUF))")
+  "status = viFlush(device, mask=(VI_READ_BUF | VI_WRITE_BUF))\n\
+flush input and/or output queue of device\n\
+see VISA manual for name and value constants (numeric)")
 {
   if (args.length()<1)
     error("invalid number of input arguments");

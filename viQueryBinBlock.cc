@@ -1,9 +1,4 @@
-// read IEEE binary data block from VISA device
-//
 // [uint8Data, status] = viQueryBinBlock(instrument, command, maxBytes)
-//
-// you might have to typecast the result to other data types in octave
-//   e.g. y = typecast(uint8Data, "int16") to combine two bytes each
 
 // Data format of IEEE 488.2 binary blocks
 // # ... ASCII character indicate header
@@ -12,7 +7,6 @@
 // y ... followed by x data bytes (uint8)
 // terminator, typically \n (on most instruments
 
-// compile and link:
 // mkoctfile -I. -L. -lvisa -s viQueryBinBlock.cc
 
 #include <iostream>
@@ -26,7 +20,10 @@ ViUInt32  bytesRequested = 0;
 ViUInt32  bytesDone = 0;
 
 DEFUN_DLD (viQueryBinBlock, args, nargout,
-  "[uint8Data, status] = viQueryBinBlock(instrument, command, maxBytes)")
+  "[uint8Data, status] = viQueryBinBlock(instrument, command, maxBytes)\n\
+read IEEE binary data block from VISA device\n\
+   you might have to typecast the result to other data types in octave\n\
+   e.g. y = typecast(uint8Data, 'int16') to combine two bytes each")
 {
   if (args.length()!=3)
     error("invalid number of input arguments");
