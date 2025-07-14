@@ -1,13 +1,15 @@
 % recompile all VISA (viXXX) functions
 
-% to get the compilation working copy the following files from your VISA
-% provider's folder.
+% to get the compilation working copy the following files 
+% from your VISA provider's folder.
+%
 % If you have installed National Instruments products
 % you will find them in folder
 % C:\Program Files (x86)\National Instruments\Shared\CVI
 %   include\visa.h
 %   include\visatype.h
 %   ExtLib\msvc64\visa.lib
+%
 % General files from IVI Foundation (headers holding some NI extensions)
 % C:\Program Files\IVI Foundation
 %   VISA\Win64\Include\visa.h
@@ -15,7 +17,7 @@
 %   VISA\Win64\Lib_x64\msc\visa64.lib
 
 % TODO
-% * add help to functions and/or create VISA.m (function overview or just help)
+% * no plans at the moment
 
 % In some cases mkoctfile could not write output files because
 % they have not been proper closed (may happen on error conditions)
