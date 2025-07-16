@@ -17,9 +17,9 @@ end
 % device manager is opened
 try
   % open connection to device, set terminator to 10 (\n)
-  [visaDev, status] = viOpen(visaRM, "COM3", 3000, 10); % 9600,N,8,1
-%  statusSerial = viConfigureSerialPort(visaDev, 1000, databits=8, parity=0, stopBits=10, flowControl=0)
-%  statusSerial = viConfigureSerialPort(visaDev, 1000, 8, 0, 10)
+  [visaDev, status] = viOpen(visaRM, "COM3", 3000, 10); % VISA default 9600,N,8,1
+%  viConfigureSerialPort(visaDev, baud, databits, parity, stopBits, flowControl)
+%  statusSerial = viConfigureSerialPort(visaDev, 1200)
 %  [visaDev, status] = viOpen(visaRM, "MSO", 3000, 10);
   if status<0
     error("open device failed");
