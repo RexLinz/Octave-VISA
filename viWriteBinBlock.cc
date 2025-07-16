@@ -58,8 +58,8 @@ write binary block to VISA device, optionally prepend with preamble string")
     status = viSetAttribute(instrument, VI_ATTR_TERMCHAR_EN, termCharEnabled);
 
   octave_value_list retval(2);
-  retval(0) = octave_value(writeCount);
-  retval(1) = octave_value(status);
+  retval(0) = octave_value(uint32NDArray(dim_vector(1,1), writeCount));
+  retval(1) = octave_value(int32NDArray(dim_vector(1,1), status));
   return retval;
 }
 

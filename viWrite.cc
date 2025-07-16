@@ -28,8 +28,8 @@ write string to VISA device")
   status = viWrite(instrument, (ViBuf)writeString, (ViUInt32)strlen(writeString), &writeCount);
 
   octave_value_list retval(2);
-  retval(0) = octave_value(writeCount);
-  retval(1) = octave_value(status);
+  retval(0) = octave_value(uint32NDArray(dim_vector(1,1), writeCount));
+  retval(1) = octave_value(int32NDArray(dim_vector(1,1), status));
   return retval;
 }
 

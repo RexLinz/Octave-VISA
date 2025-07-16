@@ -6,8 +6,8 @@
 #include <octave/oct.h>
 #include <visa.h>
 
-ViSession defaultRM = 0;
-ViStatus  status = 0;
+ViSession defaultRM = 0; // uint32
+ViStatus  status = 0; // int32
 
 DEFUN_DLD (viOpenDefaultRM, args, nargout,
   "[defaultRM, status] = viOpenDefaultRM()\n\
@@ -22,16 +22,8 @@ This function must be called before any other VISA functions")
   status = viOpenDefaultRM(&defaultRM);
 
   octave_value_list retval(2);
-// TODO return uint32
-//  uint32NDArray rm(dim_vector(1,1));
-//  rm(1,1) = reinterpret_cast<uint64_t>(defaultRM);
-//  retval(0) = octave_value(rm);
-  retval(0) = octave_value(defaultRM);
-
-//  uint32NDArray state(dim_vector(1,1));
-//  state(1,1) = status;
-//  retval(0) = octave_value(defaultRM);
-  retval(1) = octave_value(status);
+  retval(0) = octave_value(uint32NDArray(dim_vector(1,1), defaultRM));
+  retval(1) = octave_value(int32NDArray(dim_vector(1,1), status));
   return retval;
 }
 

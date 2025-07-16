@@ -40,6 +40,6 @@ see VISA manual for name and value constants (numeric)")
     mask = args(1).int_value();
   }
   status = viFlush(instrument, mask);
-  return octave_value(status);
+  return octave_value(int32NDArray(dim_vector(1,1), status));
 }
 

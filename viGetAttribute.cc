@@ -29,8 +29,8 @@ see VISA manual for name and value constants (numeric)")
   status = viGetAttribute(instrument, attributeName, &attrValue);
 
   octave_value_list retval(2);
-  retval(0) = octave_value(attrValue);
-  retval(1) = octave_value(status);
+  retval(0) = octave_value(uint32NDArray(dim_vector(1,1), attrValue)); // might be 64 bit on 64 bit systems?
+  retval(1) = octave_value(int32NDArray(dim_vector(1,1), status));
   return retval;
 }
 

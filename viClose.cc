@@ -23,8 +23,6 @@ close VISA device or resource manager")
 //  printf("closing %d\n", resource);
   status = viClose(resource);
 
-//  octave_value_list retval(1);
-//  retval(0) = octave_value(status);
-  return octave_value(status);
+  return octave_value(int32NDArray(dim_vector(1,1), status));
 }
 

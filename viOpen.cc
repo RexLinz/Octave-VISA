@@ -49,8 +49,8 @@ timeout and termchar are optional")
   }
 
   octave_value_list retval(2);
-  retval(0) = octave_value(instrument);
-  retval(1) = octave_value(status);
+  retval(0) = octave_value(uint32NDArray(dim_vector(1,1), instrument));
+  retval(1) = octave_value(int32NDArray(dim_vector(1,1), status));
   return retval;
 }
 

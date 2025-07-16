@@ -1,4 +1,4 @@
-// status = viConfigureSerialPort(device, baudrate, databits=8, parity=10, stopBits=0, flowControl=0)
+// status = viConfigureSerialPort(device, baudrate, databits=8, parity=0, stopBits=10, flowControl=0)
 
 // mkoctfile -I. -L. -lvisa -s viConfigureSerialPort.cc
 
@@ -31,8 +31,9 @@ ViAttrState attrValue = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viConfigureSerialPort, args, nargout,
-  "status = viConfigureSerialPort(device, baudrate, databits=8, parity=10, stopBits=0, flowControl=0)\n\
+  "status = viConfigureSerialPort(device, baudrate, databits=8, parity=0, stopBits=10, flowControl=0)\n\
 configure parameters for serial device\n\
+NOTE: by default VISA initializes serial ports to 9600,N,8,1\n\
 see VISA manual for name and value constants (numeric)")
 {
   if (args.length()<2)
@@ -95,6 +96,6 @@ see VISA manual for name and value constants (numeric)")
     attrValue = args(5).int_value();
   }
   status = viSetAttribute(instrument, VI_ATTR_ASRL_FLOW_CNTRL, attrValue);
-  return octave_value(status);
+  return octave_value(int32NDArray(dim_vector(1,1), status));
 }
 

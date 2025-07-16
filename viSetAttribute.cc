@@ -31,6 +31,6 @@ see VISA manual for name and value constants (numeric)")
 
   status = viSetAttribute(instrument, attributeName, attrValue);
 
-  return octave_value(status);
+  return octave_value(int32NDArray(dim_vector(1,1), status));
 }
 

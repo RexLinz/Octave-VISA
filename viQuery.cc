@@ -40,7 +40,7 @@ write string to VISA device, read response data")
 
   octave_value_list retval(2);
   retval(0) = octave_value(reinterpret_cast<const char*>(buffer));
-  retval(1) = octave_value(status);
+  retval(1) = octave_value(int32NDArray(dim_vector(1,1), status));
   return retval;
 }
 
