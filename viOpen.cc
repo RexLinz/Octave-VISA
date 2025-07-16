@@ -27,6 +27,8 @@ timeout and termchar are optional")
   const char *VISAname = args(1).string_value().c_str();
 
 //  printf("opening device %s using resource manager %d\n", VISAname, defaultRM);
+// TODO add optional parameter for accessmode to load defaults as configured in NI MAX?
+//  VI_LOAD_CONFIG (4)
   status = viOpen(defaultRM, VISAname, VI_NULL, 3000, &instrument);
 
   if ((status >= 0) && (args.length()>=3))
