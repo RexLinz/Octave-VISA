@@ -1,4 +1,4 @@
-// [instrument, status] = viOpen(defaulRM, devName, timeout, termchar)
+// [instrument, status] = viOpen(defaulRM, devName, timeout, termchar, accessmode)
 
 // mkoctfile -I. -L. -lvisa -s viOpen.cc
 
@@ -11,9 +11,11 @@ ViSession instrument = 0;
 ViStatus  status = 0;
 
 DEFUN_DLD (viOpen, args, nargout,
-  "[instrument, status] = viOpen(defaulRM, devName, timeout, termchar)\n\
+  "[instrument, status] = viOpen(defaulRM, devName, timeout, termchar, accessmode)\n\
 open a VISA session to device\n\
-timeout and termchar are optional")
+set timeout if specified and > 0\n\
+set and enable termchar if specified and >= 0\n\
+specify accessmode=4 to load settings configured in NI-MAX")
 {
   if (args.length()<2)
     error("invalid number of input arguments");
@@ -26,10 +28,17 @@ timeout and termchar are optional")
     error("visa resource name as 2nd argument");
   const char *VISAname = args(1).string_value().c_str();
 
+// optional parameter for accessmode to load defaults as configured in NI MAX?
+  uint32_t accessMode = 0;
+  if (args.length()>=5)
+  {
+    if (!args(4).is_scalar_type())
+      error("expect access mode as 5th argument");
+    accessMode = args(4).int_value();
+  }
+
 //  printf("opening device %s using resource manager %d\n", VISAname, defaultRM);
-// TODO add optional parameter for accessmode to load defaults as configured in NI MAX?
-//  VI_LOAD_CONFIG (4)
-  status = viOpen(defaultRM, VISAname, VI_NULL, 3000, &instrument);
+  status = viOpen(defaultRM, VISAname, accessMode, 3000, &instrument);
 
   if ((status >= 0) && (args.length()>=3))
   {
@@ -37,17 +46,21 @@ timeout and termchar are optional")
       error("expect timeout as 3rd argument");
     uint64_t timeout = args(2).int_value();
 //    printf("setting timeout %lld ms\n", timeout);
-    status = viSetAttribute(instrument, VI_ATTR_TMO_VALUE, timeout);
+    if (timeout>0)
+      status = viSetAttribute(instrument, VI_ATTR_TMO_VALUE, timeout);
   }
 
-  if ((status >= 0) && (args.length()==4))
+  if ((status >= 0) && (args.length()>=4))
   {
     if (!args(3).is_scalar_type())
       error("expect termchar as 4th argument");
-    uint8_t termchar = args(3).int_value();
-//    printf("setting termchar %d\n", termchar);
-    status = viSetAttribute(instrument, VI_ATTR_TERMCHAR, termchar);
-    status = viSetAttribute(instrument, VI_ATTR_TERMCHAR_EN, 1);
+    int termchar = args(3).int_value();
+    if (termchar>=0)
+    {
+      //    printf("setting termchar %d\n", termchar);
+      status = viSetAttribute(instrument, VI_ATTR_TERMCHAR, termchar);
+      status = viSetAttribute(instrument, VI_ATTR_TERMCHAR_EN, 1);
+    }
   }
 
   octave_value_list retval(2);

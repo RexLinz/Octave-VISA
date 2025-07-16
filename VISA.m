@@ -7,7 +7,7 @@
 %
 % [defaultRM, status] = viOpenDefaultRM()
 %   Open the default VISA recource manager (required to open device connections)
-% [instrument, status] = viOpen(defaulRM, devName, timeout, termchar)
+% [instrument, status] = viOpen(defaulRM, devName, timeout, termchar, accessmode)
 %   Open a connection to the named device
 % status = viSetAttribute(device, attributeName, attributeValue)
 %   Set any attribute
