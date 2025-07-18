@@ -1,8 +1,9 @@
 % Agilent 33250A / MSO-X 2024 bode plotter
 
 global visaRM
-global visaFG
 global visaMSO
+global visaFG
+global useScopeFG
 
 if visaFG>0
   viClose(visaFG);
@@ -17,6 +18,7 @@ end
 visaRM  = int32(0); % VISA handle to resource manager
 visaMSO = int32(0); % VISA handle to scope
 visaFG  = int32(0); % VISA handle to function generator
+useScopeFG = 0;
 
 % set up GUI layout
 uiFig = figure(1,
@@ -81,7 +83,7 @@ function MSO = initMSO(source, event)
 end
 uimenu("text", "init &MSO", "accelerator", "m", "menuselectedfcn", @initMSO);
 
-% open and initialze function generator with defaults
+% open and initialze 33250A function generator with defaults
 function initFG(source, event)
   global visaRM
   if visaRM==0
@@ -112,7 +114,35 @@ function initFG(source, event)
     disp("  no connection to function generator");
   end
 end
-uimenu("text", "init &Generator", "accelerator", "g", "menuselectedfcn", @initFG);
+% open and initialze function generator in MSO2000 or MSO3000 series with defaults
+function initScopeFG(source, event)
+  global visaRM
+  if visaRM==0
+    visaRM = viOpenDefaultRM();
+  end
+  global visaMSO
+  disp("initialize Scope function generator");
+  if visaMSO==0 % device not open so far
+    [visaMSO, status] = viOpen(visaRM, "MSO-USB", 5000, 10);
+  end
+  if visaMSO>0
+%    viWrite(visaMSO, ":WGEN:RST\n"); % 1kHz sin, 500mVpp
+    viWrite(visaMSO, ":WGEN:FUNC SIN\n");         % sinewave
+    viWrite(visaMSO, ":WGEN:FREQ +1000.0\n");     % 1kHz
+    viWrite(visaMSO, ":WGEN:OUTP:LOAD ONEMeg\n"); % high impedance load
+    viWrite(visaMSO, ":WGEN:VOLT +1.0\n");        % 1.0 Vpp
+    viWrite(visaMSO, ":WGEN:VOLT:OFFS +0.0\n");   % no offset
+    viWrite(visaMSO, ":WGEN:MOD:STAT OFF\n");     % no modulation
+    viWrite(visaMSO, ":WGEN:OUTP 1\n");           % output on
+  else
+    disp("  no connection to Scope function generator");
+  end
+end
+if useScopeFG
+  uimenu("text", "init &Generator", "accelerator", "g", "menuselectedfcn", @initScopeFG);
+else
+  uimenu("text", "init &Generator", "accelerator", "g", "menuselectedfcn", @initFG);
+end
 
 % load data for display
 function openFile(source, event)
@@ -283,7 +313,14 @@ function FGsetFrequency(f)
     disp("FGsetFrequency: function generator not initialized");
   end
 end
-
+function ScopeFGsetFrequency(f)
+  global visaMSO;
+  if visaMSO>0
+    viWrite(visaMSO, [":WGEN:FREQ " num2str(f) "\n"]);
+  else
+    disp("ScopeFGsetFrequency: function generator not initialized");
+  end
+end
 % change signal amplitude
 function FGsetAmplitude(Vpp)
   global visaFG;
@@ -293,7 +330,14 @@ function FGsetAmplitude(Vpp)
     disp("FGsetAmplitude: function generator not initialized");
   end
 end
-
+function ScopeFGsetAmplitude(Vpp)
+  global visaMSO;
+  if visaMSO>0
+    viWrite(visaMSO, [":WGEN:VOLT " num2str(Vpp) "\n"]);
+  else
+    disp("ScopeFGsetAmplitude: function generator not initialized");
+  end
+end
 % set up measurement values displayed on scope (just for user)
 function MSOsetMeasurementDisplay(channelIn, channelOut)
   global visaMSO;
@@ -357,13 +401,18 @@ function runPressed(source, event)
   global configTable;
   global dataTable;
   global visaMSO;
+  global useScopeFG;
   % blank data table
   data = defaultData(); % blank table with frequencies to measure
   set(dataTable, "data", data);
   config = get(configTable, "data"); % vector of numbers in column 2
   % set up output level
   Vpp = cell2mat(config(6,2));
-  FGsetAmplitude(Vpp);
+  if useScopeFG
+    ScopeFGsetAmplitude(Vpp);
+  else
+    FGsetAmplitude(Vpp);
+  end
   % get channels to use
   channelIn = cell2mat(config(9,2));
   channelOut = cell2mat(config(10,2));
@@ -373,7 +422,11 @@ function runPressed(source, event)
   outRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channelOut) ":RANGE?"], 100));
   f = data(:,1);
   for n = 1:length(f)
-    FGsetFrequency(f(n));
+    if useScopeFG
+      ScopeFGsetFrequency(f(n));
+    else
+      FGsetFrequency(f(n));
+    end
     MSOsetTimeRange(2/f(n)); % set time range to 2 periods
     % adjust range on input channel
     stopAdjust = 0;
