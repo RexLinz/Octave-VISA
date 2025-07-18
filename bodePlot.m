@@ -15,8 +15,8 @@ if visaRM>0
 end
 
 visaRM  = int32(0); % VISA handle to resource manager
-visaFG  = int32(0); % VISA handle to function generator
 visaMSO = int32(0); % VISA handle to scope
+visaFG  = int32(0); % VISA handle to function generator
 
 % set up GUI layout
 uiFig = figure(1,
@@ -26,39 +26,6 @@ uiFig = figure(1,
   "position", [24 206 790 470]
 );
 clf;
-
-% open and initialze function generator with defaults
-function initFG(source, event)
-  global visaRM
-  if visaRM==0
-    visaRM = viOpenDefaultRM();
-  end
-  global visaFG
-  disp("initialize function generator");
-  if visaFG==0 % device not opened so far
-%    FG = viOpen(visaRM, "USB0::0x03EB::0x2065::Agilent_Technologies_33250A_0_1.03-1.01-1.00-03-1::INSTR");
-    [visaFG, status] = viOpen(visaRM, "33250A", 3000, 10);
-  end
-  if visaFG>0
-%    viWrite(visaFG, "*RST\n");
-    viWrite(visaFG, ":FUNC SIN\n");         % sinewave
-    viWrite(visaFG, ":FREQ +1000.0\n");     % 1kHz
-    viWrite(visaFG, ":OUTP:LOAD 9.9E37\n"); % high impedance load
-    viWrite(visaFG, ":VOLT:UNIT VPP\n");    % programming as VPP
-    viWrite(visaFG, ":VOLT +1.0\n");        % 1.0 Vpp
-    viWrite(visaFG, ":VOLT:OFFS +0.0\n");   % no offset
-    viWrite(visaFG, ":VOLT:RANG:AUTO 1\n"); % output range (attenuator)
-    viWrite(visaFG, ":BURS:STAT 0\n");      % no burst
-    viWrite(visaFG, ":SWE:STAT 0\n");       % no sweep
-    viWrite(visaFG, ":AM:STAT 0\n");        % no AM
-    viWrite(visaFG, ":FM:STAT 0\n");        % no FM
-    viWrite(visaFG, ":FSK:STAT 0\n");       % no FSK
-    viWrite(visaFG, ":OUTP 1\n");           % output on
-  else
-    disp("  no connection to function generator");
-  end
-end
-uimenu("text", "init &Generator", "accelerator", "g", "menuselectedfcn", @initFG);
 
 % open and initialize oscilloscope with default
 function MSO = initMSO(source, event)
@@ -113,6 +80,39 @@ function MSO = initMSO(source, event)
   end
 end
 uimenu("text", "init &MSO", "accelerator", "m", "menuselectedfcn", @initMSO);
+
+% open and initialze function generator with defaults
+function initFG(source, event)
+  global visaRM
+  if visaRM==0
+    visaRM = viOpenDefaultRM();
+  end
+  global visaFG
+  disp("initialize function generator");
+  if visaFG==0 % device not opened so far
+%    FG = viOpen(visaRM, "USB0::0x03EB::0x2065::Agilent_Technologies_33250A_0_1.03-1.01-1.00-03-1::INSTR");
+    [visaFG, status] = viOpen(visaRM, "33250A", 3000, 10);
+  end
+  if visaFG>0
+%    viWrite(visaFG, "*RST\n");
+    viWrite(visaFG, ":FUNC SIN\n");         % sinewave
+    viWrite(visaFG, ":FREQ +1000.0\n");     % 1kHz
+    viWrite(visaFG, ":OUTP:LOAD 9.9E37\n"); % high impedance load
+    viWrite(visaFG, ":VOLT:UNIT VPP\n");    % programming as VPP
+    viWrite(visaFG, ":VOLT +1.0\n");        % 1.0 Vpp
+    viWrite(visaFG, ":VOLT:OFFS +0.0\n");   % no offset
+    viWrite(visaFG, ":VOLT:RANG:AUTO 1\n"); % output range (attenuator)
+    viWrite(visaFG, ":BURS:STAT 0\n");      % no burst
+    viWrite(visaFG, ":SWE:STAT 0\n");       % no sweep
+    viWrite(visaFG, ":AM:STAT 0\n");        % no AM
+    viWrite(visaFG, ":FM:STAT 0\n");        % no FM
+    viWrite(visaFG, ":FSK:STAT 0\n");       % no FSK
+    viWrite(visaFG, ":OUTP 1\n");           % output on
+  else
+    disp("  no connection to function generator");
+  end
+end
+uimenu("text", "init &Generator", "accelerator", "g", "menuselectedfcn", @initFG);
 
 % load data for display
 function openFile(source, event)
