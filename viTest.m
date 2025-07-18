@@ -21,6 +21,7 @@ try
 %  viConfigureSerialPort(visaDev, baud, databits, parity, stopBits, flowControl)
 %  statusSerial = viConfigureSerialPort(visaDev, 1200)
 %  [visaDev, status] = viOpen(visaRM, "MSO", 3000, 10);
+  [visaDev, status] = viOpen(visaRM, "33250A", 3000, 10); % function generator
   if status<0
     error("open device failed");
   end
