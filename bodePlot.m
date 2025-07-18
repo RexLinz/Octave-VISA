@@ -260,17 +260,24 @@ function MSOsetAmpRange(channel, Vpp)
 end
 
 function result = measure(f, Vpp, channelIn, channelOut)
-  switch 0
-    case 0 % simulated
-      vIn = Vpp;
-      G = 1./(1+1i*f/1000);
-      vOut = abs(Vpp*G);
-      gain = abs(G);
-      gainDB = 20*log10(gain);
-      phase = rad2deg(arg(G));
-      result = [f vIn vOut gain gainDB phase];
-    otherwise % use scope
+  global visaMSO;
+  if visaMSO==0
+    vIn = Vpp;
+    G = 1./(1+1i*f/1000);
+    vOut = abs(Vpp*G);
+    gain = abs(G);
+    phase = rad2deg(arg(G));
+  else
+    vIn = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(channelIn) "\n"], 100));
+    vOut = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(channelOut) "\n"], 100));
+    gain = abs(vOut/vIn);
+    phase = str2num(viQuery(visaMSO, [":MEAS:PHASe? CHAN" num2str(channelOut) ",CHAN" num2str(channelIn) "\n"], 100));
+    if phase>400
+      phase = NA;
+    end
   end
+  gainDB = 20*log10(gain);
+  result = [f vIn vOut gain gainDB phase];
 end
 
 function runPressed(source, event)
@@ -294,14 +301,14 @@ function runPressed(source, event)
   data = NA(nPoints, 6);
   data(:,1) = f;
   set(dataTable, "data", data);
-  inRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channelIn) ":RANGE?"], 100))
-  outRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channelOut) ":RANGE?"], 100))
+  inRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channelIn) ":RANGE?"], 100));
+  outRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channelOut) ":RANGE?"], 100));
   for n = 1:length(f)
     FGsetFrequency(f(n));
     MSOsetTimeRange(2/f(n)); % set time range
-    % TODO adjust scopesettings if level is too low or high
+    pause(0.2);
     % adjust range on input channel
-    while (inRange>0.010) && (inRange<100)
+    while (inRange>0.160) && (inRange<100)
       vppIn = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(channelIn) "\n"], 100));
       if vppIn > 0.95*inRange
         inRange = inRange*2;
@@ -314,22 +321,35 @@ function runPressed(source, event)
       end
     end
     % adjust range on output channel
-    while (outRange>0.010) && (outRange<100)
-      vppOut = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(channelOut) "\n"], 100))
-      if vppOut > 0.95*inRange
+    while (outRange>0.160) && (outRange<100)
+      vppOut = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(channelOut) "\n"], 100));
+      if vppOut > 0.95*outRange
         outRange = outRange*2;
-        MSOsetAmpRange(channelIn, outRange);
+        MSOsetAmpRange(channelOut, outRange);
       elseif vppOut < 0.4*outRange
         outRange = outRange/2; % 1.2*vppIn;
-        MSOsetAmpRange(channelIn, outRange);
+        MSOsetAmpRange(channelOut, outRange);
       else
         break;
       end
     end
     data(n,:) = measure(f(n), Vpp, channelIn, channelOut);
     set(dataTable, "data", data);
-    pause(0.5);
   end
+  figure(2);
+  hGain = subplot(2,1,1);
+  plot(data(:,1), data(:,5)); grid on;
+  xlabel("f [Hz]");
+  ylabel("gain [dB]");
+  hPhase = subplot(2,1,2);
+  plot(data(:,1), data(:,6)); grid on;
+  xlabel("f [Hz]");
+  ylabel("phase [deg]");
+  if logF==1
+    set(hGain, "XScale", "log");
+    set(hPhase, "XScale", "log");
+  end
+  linkaxes([hGain, hPhase], "x");
 end
 % runButton =
 uicontrol(uiFig,
