@@ -364,7 +364,7 @@ end
 function MSOsetTimeRange(seconds)
   global visaMSO;
   if visaMSO>0
-    viWrite(visaMSO, ["TIM:RANGE " num2str(seconds) "\n"]);
+    viWrite(visaMSO, [":TIM:RANGE " num2str(seconds) "\n"]);
   else
     disp("MSOsetTimeRange: scope not initialized");
   end
@@ -392,8 +392,8 @@ function result = measure(channelIn, channelOut, f, Vpp)
     phase = rad2deg(arg(G));
   else % get actual data from scope
     % NOTE measuring RMS is more accurate than VPP in case of noise on any channel
-    vIn = str2num(viQuery(visaMSO, [":MEAS:VRMS? CHAN" num2str(channelIn) "\n"], 100));
-    vOut = str2num(viQuery(visaMSO, [":MEAS:VRMS? CHAN" num2str(channelOut) "\n"], 100));
+    vIn = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelIn) "\n"], 100));
+    vOut = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelOut) "\n"], 100));
     gain = abs(vOut/vIn);
     phase = str2num(viQuery(visaMSO, [":MEAS:PHASe? CHAN" num2str(channelOut) ",CHAN" num2str(channelIn) "\n"], 100));
     if phase>400
