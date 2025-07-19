@@ -44,6 +44,7 @@ function MSO = initMSO(source, event)
     % get input and output channels
     global configTable;
     config = get(configTable, "data"); % vector of numbers in column 2
+    labels = {"IN", "OUT"};
     for c = 1:2 % line indices to table
       channelNumber = cell2mat(config(c+8,2));
       chString = [":CHAN" num2str(channelNumber)];
@@ -53,13 +54,17 @@ function MSO = initMSO(source, event)
       viWrite(visaMSO, [chString ":RANGE 8.0\n"]);   % full scale range
       viWrite(visaMSO, [chString ":OFFset 0.0\n"]);  % no offset
       viWrite(visaMSO, [chString ":UNIT VOLT\n"]);   % voltage displayed
+      viWrite(visaMSO, [chString ":LAB \"" char(labels(c)) "\"\n"]);
     end
+    viWrite(visaMSO, ":DISPlay:LABel ON\n");
 
     viWrite(visaMSO, ":TRIG:MODE EDGE\n");         % trigger on edge
     viWrite(visaMSO, ":TRIG:EDGE:SLOP POS\n");     % positive edge
     channelNumber = cell2mat(config(9,2));         % input to DUT
     chString = ["CHAN" num2str(channelNumber)];
-    viWrite(visaMSO, [":TRIG:EDGE:LEV 0," chString "\n"]);  % trigger on channelIn
+    viWrite(visaMSO, [":TRIG:EDGE:LEVel 0\n"]);    % trigger on channelIn
+    viWrite(visaMSO, [":TRIG:EDGE:SOURCE " chString "\n"]);  % trigger on channelIn
+    % TODO: might add trigger coupling AC, noise reject and HF reject?
 
     % NOTE: averaging significantly slowing down on low frequency
     switch 2
@@ -351,6 +356,7 @@ function MSOsetMeasurementDisplay(channelIn, channelOut)
     viWrite(visaMSO, [":" inString ":LAB  \"IN\"\n"]);
     viWrite(visaMSO, [":" outString ":LAB \"OUT\"\n"]);
     viWrite(visaMSO, ":DISPlay:LABel ON\n");       % display labels
+    viWrite(visaMSO, [":TRIG:EDGE:SOURCE " inString "\n"]);  % trigger on channelIn
   end
 end
 
@@ -442,7 +448,7 @@ function runPressed(source, event)
         MSOsetAmpRange(channelIn, inRange);
       elseif vppIn < 0.4*inRange
         inRange = inRange/2; % 1.2*vppIn;
-        if inRange<0.08
+        if inRange<0.08 % TODO we could accept 8 mV if using 1:1 probe
           inRange=0.08; stopAdjust=1;
         end
         MSOsetAmpRange(channelIn, inRange);
@@ -462,7 +468,7 @@ function runPressed(source, event)
         MSOsetAmpRange(channelOut, outRange);
       elseif vppOut < 0.4*outRange
         outRange = outRange/2; % 1.2*vppIn;
-        if outRange < 0.08
+        if outRange < 0.08 % TODO we could accept 8 mV if using 1:1 probe
           outRange = 0.08; stopAdjust=1;
         end
         MSOsetAmpRange(channelOut, outRange);
