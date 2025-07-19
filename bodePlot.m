@@ -44,7 +44,6 @@ function MSO = initMSO(source, event)
     % get input and output channels
     global configTable;
     config = get(configTable, "data"); % vector of numbers in column 2
-    labels = {"IN", "OUT"}; % trace labels
     for c = 1:2 % line indices to table
       channelNumber = cell2mat(config(c+8,2));
       chString = [":CHAN" num2str(channelNumber)];
@@ -54,9 +53,7 @@ function MSO = initMSO(source, event)
       viWrite(visaMSO, [chString ":RANGE 8.0\n"]);   % full scale range
       viWrite(visaMSO, [chString ":OFFset 0.0\n"]);  % no offset
       viWrite(visaMSO, [chString ":UNIT VOLT\n"]);   % voltage displayed
-      viWrite(visaMSO, [chString ":LAB \"" char(labels(c)) "\""]);
     end
-    viWrite(visaMSO, ":DISPlay:LABel ON\n");       % display labels
 
     viWrite(visaMSO, ":TRIG:MODE EDGE\n");         % trigger on edge
     viWrite(visaMSO, ":TRIG:EDGE:SLOP POS\n");     % positive edge
@@ -343,12 +340,17 @@ function MSOsetMeasurementDisplay(channelIn, channelOut)
   global visaMSO;
   if visaMSO>0
     viWrite(visaMSO, ":MEASure:CLEar\n");
-%    viWrite(visaMSO, ":MEASure:VPP CHAN1\n");
-%    viWrite(visaMSO, ":MEASure:VPP CHAN2\n");
-    viWrite(visaMSO, ":MEASure:VRMS CYCLe,AC,CHAN1\n");
-    viWrite(visaMSO, ":MEASure:VRMS CYCLe,AC,CHAN2\n");
-    viWrite(visaMSO, ":MEASure:PHASe CHAN2,CHAN1\n");
+    inString = ["CHAN" num2str(channelIn)];
+    outString = ["CHAN" num2str(channelOut)];
+%    viWrite(visaMSO, [":MEASure:VPP " num2str(channelIn)  "\n"]);
+%    viWrite(visaMSO, [":MEASure:VPP " num2str(channelOut) "\n"]);
+    viWrite(visaMSO, [":MEASure:VRMS CYCLe,AC," inString  "\n"]);
+    viWrite(visaMSO, [":MEASure:VRMS CYCLe,AC," outString "\n"]);
+    viWrite(visaMSO, [":MEASure:PHASe " outString "," inString "\n"]);
     viWrite(visaMSO, ":MEASure:SHOW ON\n");
+    viWrite(visaMSO, [":" inString ":LAB  \"IN\"\n"]);
+    viWrite(visaMSO, [":" outString ":LAB \"OUT\"\n"]);
+    viWrite(visaMSO, ":DISPlay:LABel ON\n");       % display labels
   end
 end
 
