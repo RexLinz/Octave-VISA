@@ -18,7 +18,7 @@ end
 visaRM  = int32(0); % VISA handle to resource manager
 visaMSO = int32(0); % VISA handle to scope
 visaFG  = int32(0); % VISA handle to function generator
-useScopeFG = 0;
+useScopeFG = 1;
 
 % set up GUI layout
 uiFig = figure(1,
