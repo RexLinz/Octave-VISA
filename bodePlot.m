@@ -380,6 +380,40 @@ function MSOsetAmpRange(channel, Vpp)
   end
 end
 
+% get settings and limits for specified scope channel
+function settings = MSOgetSettings(visaMSO, channel)
+  settings.channel = channel;
+  settings.actRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channel) ":RANGE?"], 100));
+  settings.probe = str2num(viQuery(visaMSO, [":CHAN" num2str(channel) ":PROBE?"], 100));
+  settings.minRange = 0.008*settings.probe;
+  settings.maxRange = 40*settings.probe;
+end
+
+% adapt sensitivity of given channel to optimize display
+function settings = MSOadaptScale(visaMSO, settings)
+  stopAdjust = 0;
+  for adjustLoop=1:10 % time out if not converging
+    vpp = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(settings.channel) "\n"], 100));
+    if vpp > 0.95*settings.actRange % clipped -> increase range
+      if settings.actRange == settings.maxRange
+        disp(["could not further increase input range on channel " num2str(settings.channel)]);
+        return;
+      end
+      settings.actRange = min(10*settings.actRange, settings.maxRange); % fast scaling
+    elseif vpp < 0.7*settings.actRange
+      if settings.actRange == settings.minRange
+        disp(["could not further decrease input range on channel " num2str(settings.channel)]);
+        return;
+      end
+      settings.actRange = max(vpp/0.8, settings.minRange); % expect vpp=0.8*settings.actRange after
+    else
+      return; % scaling look fine
+    end
+    MSOsetAmpRange(settings.channel, settings.actRange);
+  end
+  disp(["adjusting range did not converge on channel " num2str(settings.channel)]);
+end
+
 % get results from scope, assuming valid time and y settings
 function result = measure(channelIn, channelOut, f, Vpp)
   % NOTE f and Vpp used for simulation only
@@ -388,18 +422,17 @@ function result = measure(channelIn, channelOut, f, Vpp)
     vIn = Vpp/sqrt(2);
     G = 1./(1+1i*f/1000);
     vOut = abs(Vpp*G);
-    gain = abs(G);
     phase = rad2deg(arg(G));
   else % get actual data from scope
     % NOTE measuring RMS is more accurate than VPP in case of noise on any channel
     vIn = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelIn) "\n"], 100));
+    if vIn>1E6, vIn=NA; end
     vOut = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelOut) "\n"], 100));
-    gain = abs(vOut/vIn);
+    if vOut>1E6, vOut=NA; end
     phase = str2num(viQuery(visaMSO, [":MEAS:PHASe? CHAN" num2str(channelOut) ",CHAN" num2str(channelIn) "\n"], 100));
-    if phase>400
-      phase = NA;
-    end
+    if phase>400, phase = NA; end
   end
+  gain = abs(vOut/vIn);
   gainDB = 20*log10(gain);
   result = [f vIn vOut gain gainDB phase];
 end
@@ -421,65 +454,25 @@ function runPressed(source, event)
   else
     FGsetAmplitude(Vpp);
   end
-  % get channels to use
-  channelIn = cell2mat(config(9,2));
-  channelOut = cell2mat(config(10,2));
-  MSOsetMeasurementDisplay(channelIn, channelOut); % measurements on scope
-  % actual settings for both channels
-  inRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channelIn) ":RANGE?"], 100));
-  outRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channelOut) ":RANGE?"], 100));
-  f = data(:,1);
+  % get actual settings and limits for both channels
+  channelIn = MSOgetSettings(visaMSO, cell2mat(config(9,2)));
+  channelOut = MSOgetSettings(visaMSO, cell2mat(config(10,2)));
+  % set display (names, measurements)
+  MSOsetMeasurementDisplay(channelIn.channel, channelOut.channel); % measurements on scope
+  % start actual measurement
   for n = 1:length(f)
+    % set frequency of signal and appropriate time range on scope
     if useScopeFG
       ScopeFGsetFrequency(f(n));
     else
       FGsetFrequency(f(n));
     end
     MSOsetTimeRange(2/f(n)); % set time range to 2 periods
-    % adjust range on input channel
-    stopAdjust = 0;
-    for adjustLoop=1:10 % time out if not converging
-      vppIn = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(channelIn) "\n"], 100));
-      if vppIn > 0.95*inRange
-        inRange = inRange*2;
-        if inRange>50
-          inRange=50; stopAdjust=1;
-        end
-        MSOsetAmpRange(channelIn, inRange);
-      elseif vppIn < 0.4*inRange
-        inRange = inRange/2; % 1.2*vppIn;
-        if inRange<0.08 % TODO we could accept 8 mV if using 1:1 probe
-          inRange=0.08; stopAdjust=1;
-        end
-        MSOsetAmpRange(channelIn, inRange);
-      else
-        break;
-      end
-    end
-    % adjust range on output channel
-    stopAdjust = 0;
-    for adjustLoop=1:10 % time out if not converging
-      vppOut = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(channelOut) "\n"], 100));
-      if vppOut > 0.95*outRange
-        outRange = outRange*2;
-        if outRange>50
-          outRange = 50; stopAdjust=1;
-        end
-        MSOsetAmpRange(channelOut, outRange);
-      elseif vppOut < 0.4*outRange
-        outRange = outRange/2; % 1.2*vppIn;
-        if outRange < 0.08 % TODO we could accept 8 mV if using 1:1 probe
-          outRange = 0.08; stopAdjust=1;
-        end
-        MSOsetAmpRange(channelOut, outRange);
-      else
-        break; % in expected range
-      end
-      if stopAdjust==1
-        break;
-      end
-    end
-    data(n,:) = measure(channelIn, channelOut, f(n), Vpp); % get measurements
+    % adjust range on scope channels
+    channelIn  = MSOadaptScale(visaMSO, channelIn);
+    channelOut = MSOadaptScale(visaMSO, channelOut);
+    % get measurementss
+    data(n,:) = measure(channelIn.channel, channelOut.channel, f(n), Vpp);
     set(dataTable, "data", data); % show in table
   end
   updatePlot([], []); % trigger plot update
