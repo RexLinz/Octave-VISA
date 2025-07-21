@@ -381,7 +381,8 @@ function MSOsetAmpRange(channel, Vpp)
 end
 
 % get settings and limits for specified scope channel
-function settings = MSOgetSettings(visaMSO, channel)
+function settings = MSOgetSettings(channel)
+  global visaMSO;
   settings.channel = channel;
   settings.actRange = str2num(viQuery(visaMSO, [":CHAN" num2str(channel) ":RANGE?"], 100));
   settings.probe = str2num(viQuery(visaMSO, [":CHAN" num2str(channel) ":PROBE?"], 100));
@@ -390,7 +391,8 @@ function settings = MSOgetSettings(visaMSO, channel)
 end
 
 % adapt sensitivity of given channel to optimize display
-function settings = MSOadaptScale(visaMSO, settings)
+function settings = MSOadaptScale(settings)
+  global visaMSO;
   stopAdjust = 0;
   for adjustLoop=1:10 % time out if not converging
     vpp = str2num(viQuery(visaMSO, [":MEAS:VPP? CHAN" num2str(settings.channel) "\n"], 100));
@@ -415,7 +417,7 @@ function settings = MSOadaptScale(visaMSO, settings)
 end
 
 % get results from scope, assuming valid time and y settings
-function result = measure(channelIn, channelOut, f, Vpp)
+function result = measure(channelNumIn, channelNumOut, f, Vpp)
   % NOTE f and Vpp used for simulation only
   global visaMSO;
   if visaMSO==0 % simulate data of low pass
@@ -425,11 +427,11 @@ function result = measure(channelIn, channelOut, f, Vpp)
     phase = rad2deg(arg(G));
   else % get actual data from scope
     % NOTE measuring RMS is more accurate than VPP in case of noise on any channel
-    vIn = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelIn) "\n"], 100));
+    vIn = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelNumIn) "\n"], 100));
     if vIn>1E6, vIn=NA; end
-    vOut = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelOut) "\n"], 100));
+    vOut = str2num(viQuery(visaMSO, [":MEAS:VRMS? CYCLe,AC,CHAN" num2str(channelNumOut) "\n"], 100));
     if vOut>1E6, vOut=NA; end
-    phase = str2num(viQuery(visaMSO, [":MEAS:PHASe? CHAN" num2str(channelOut) ",CHAN" num2str(channelIn) "\n"], 100));
+    phase = str2num(viQuery(visaMSO, [":MEAS:PHASe? CHAN" num2str(channelNumOut) ",CHAN" num2str(channelNumIn) "\n"], 100));
     if phase>400, phase = NA; end
   end
   gain = abs(vOut/vIn);
@@ -455,11 +457,12 @@ function runPressed(source, event)
     FGsetAmplitude(Vpp);
   end
   % get actual settings and limits for both channels
-  channelIn = MSOgetSettings(visaMSO, cell2mat(config(9,2)));
-  channelOut = MSOgetSettings(visaMSO, cell2mat(config(10,2)));
+  channelIn = MSOgetSettings(cell2mat(config(9,2)));
+  channelOut = MSOgetSettings(cell2mat(config(10,2)));
   % set display (names, measurements)
   MSOsetMeasurementDisplay(channelIn.channel, channelOut.channel); % measurements on scope
   % start actual measurement
+  f = data(:,1);
   for n = 1:length(f)
     % set frequency of signal and appropriate time range on scope
     if useScopeFG
@@ -469,8 +472,8 @@ function runPressed(source, event)
     end
     MSOsetTimeRange(2/f(n)); % set time range to 2 periods
     % adjust range on scope channels
-    channelIn  = MSOadaptScale(visaMSO, channelIn);
-    channelOut = MSOadaptScale(visaMSO, channelOut);
+    channelIn  = MSOadaptScale(channelIn);
+    channelOut = MSOadaptScale(channelOut);
     % get measurementss
     data(n,:) = measure(channelIn.channel, channelOut.channel, f(n), Vpp);
     set(dataTable, "data", data); % show in table
